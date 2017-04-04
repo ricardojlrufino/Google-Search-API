@@ -1,6 +1,7 @@
 package com.mohammadag.googlesearchapi;
 
 public class Constants {
+	public static final String APP_PACKAGE = "com.mohammadag.googlesearchapi";
 	public static final String GOOGLE_SEARCH_PACKAGE = "com.google.android.googlequicksearchbox";
 	public static final String INTENT_SETTINGS_UPDATED = "com.mohammadag.googlesearchapi.SETTINGS_UPDATED";
 
@@ -12,4 +13,5 @@ public class Constants {
 	public static final String INTENT_FLUSH_INTENTS = "com.mohammadag.googlesearchapi.FLUSH_INTENTS";
 
 	public static final String PERMISSION = "com.mohammadag.googlesearchapi.permission.ACCESS_GGOGLE_SEARCH_API";
+	public static final String DEFAULT_HOOK = "com.google.android.apps.gsa.search.shared.overlay.a.v";
 }

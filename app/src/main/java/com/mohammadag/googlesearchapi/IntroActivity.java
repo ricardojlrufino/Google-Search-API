@@ -29,12 +29,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 
@@ -59,13 +61,12 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 	public PluginsFragment mPluginsFragment;
 	private BroadcastReceiver mPackageReceiver;
     String version = "123";
-    String Code = "Missing";
 
-	class RequestTask extends AsyncTask<String, String, String> {
+	class DownloadTask extends AsyncTask<String, String, String> {
 
 		@Override
 		protected String doInBackground(String... uri) {
-			String responseString = "Nope";
+			String responseString = null;
 
 			try {
 				URL u = new URL(uri[0]);
@@ -76,7 +77,7 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 
 				responseString = convertStreamToString(inputStream);
 			} catch (Exception e) {
-				responseString = "Nope";
+				responseString = null;
 			}
 
 
@@ -85,70 +86,71 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 
 		@Override
 		protected void onPostExecute(String result) {
-			super.onPostExecute(result);
 
+			if(result == null || result.equals("")){
+				setToast("Download Fail !");
+			}
+
+			// Check current google now api version
 			List<PackageInfo> packs = getPackageManager().getInstalledPackages(0);
 			for (int i = 0; i < packs.size(); i++) {
 				PackageInfo p = packs.get(i);
 				if (p.packageName.equals("com.google.android.googlequicksearchbox")) {
 					version = Integer.toString(p.versionCode);
-					version = version.substring(0, version.length() - 1);
 				}
 			}
 
 			SharedPreferences prfs = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE);
-			String text = prfs.getString("Hooks", "365457356");
+			String currentHook = prfs.getString("Hook", Constants.DEFAULT_HOOK);
 
-			String toast = "Hooks have been updated.\nPlease reboot!";
-
-
-			String[] html = result.split("<p>");
-
-			String matched = "No";
-
-			int count = 0;
-			int max = 0;
-			for (String data : html) {
-				max++;
+			Properties properties = new Properties();
+			try {
+				properties.load(new StringReader(result));
+			} catch (IOException e) {
+                // none
 			}
 
-			for (String data : html) {
-				count++;
+            String found = properties.getProperty(version);
 
-				String finalCheck = "123";
+            // Try best match (-1)
+            if(found == null){
 
-				if (!data.isEmpty()) {
-					String[] PasteVersion = data.split(";");
-					finalCheck = PasteVersion[0];
-				}
+                version = version.substring(0, version.length() - 1);
 
-				if (version.equals(finalCheck) && !data.isEmpty()) {
-					data = data.replace("<p>", "");
-					data = data.replace("</p>", "");
-					if (data.trim().equals(text.trim())) {
-						toast = "You already have the latest hooks";
-					} else {
-						toast = "Hooks have been updated.\nPlease reboot!";
-						Hooks(data);
-					}
-					matched = "Yes";
-				} else {
-					if (count == max && matched.equals("No")) {
-						System.out.println("Trying default hook!");
-						String fallback = html[1];
-						fallback = fallback.replace("<p>", "");
-						fallback = fallback.replace("</p>", "");
-						fallback = fallback.replaceAll("[0-9]", "");
-						String SavedHooks = text.replaceAll("[0-9]", "");
-						if (fallback.trim().equals(SavedHooks.trim())) {
-							toast = "You already have the latest hooks";
-						} else {
-							Hooks(fallback);
-							toast = "Hooks have been updated.\nPlease reboot!";
-						}
-					}
-				}
-			}
+                Set<Object> versions = properties.keySet();
+
+                for (Object v : versions) {
+
+                    String ver = v.toString().substring(0, v.toString().length() - 1);
+
+                    if(ver.equals(version)){
+                        found = properties.getProperty(ver);
+                    }
+
+                }
+
+            }
+
+            String toast = null;
+
+            if(found == null){
+
+                setHooks(Constants.DEFAULT_HOOK);
+
+                toast = "Using default hooks";
+
+            }else if (found.equalsIgnoreCase(Constants.DEFAULT_HOOK) || found.equalsIgnoreCase(currentHook)){
+
+                toast = "You already have the latest hooks";
+
+            }else{
+
+                setHooks(found);
+
+                toast = "Hooks have been updated.\nPlease reboot!";
+
+            }
+
 			setToast(toast);
 		}
 	}
@@ -283,7 +285,7 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 			return true;
         case R.id.menu_change:
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Paste The New Hooks");
+            builder.setTitle("Insert New Hooks");
 
             final EditText input = new EditText(this);
             input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -293,7 +295,7 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     SharedPreferences.Editor editor = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE).edit();
-                    editor.putString("First", input.getText().toString());
+                    editor.putString("Hook", input.getText().toString());
                     editor.apply();
                 }
             });
@@ -312,7 +314,7 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 			startActivity(donate);
 			return true;
         case R.id.menu_hooks:
-            new RequestTask().execute("http://pastebin.com/raw.php?i=znLZVSi2");
+            new DownloadTask().execute("https://raw.githubusercontent.com/ricardojlrufino/Google-Search-API/master/hooksversion.properties");
             return true;
 		case android.R.id.home:
 			onBackPressed();
@@ -393,12 +395,9 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 		toast.show();
 	}
 
-    public void Hooks (String data) {
-        String[] split = data.split(";");
+    public void setHooks(String data) {
 		SharedPreferences.Editor editor = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE).edit();
-		editor.putString("First", split[1]);
-		editor.putString("Second", split[2]);
-		editor.putString("Hooks", data);
+		editor.putString("Hook", data);
 		editor.putString("Version", version);
 		editor.apply();
     }

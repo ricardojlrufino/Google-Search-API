@@ -53,12 +53,14 @@
         android:id="@+id/delay_broadcasts_checkbox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:enabled="false"
         android:text="@string/delay_broadcasts" />
 
     <CheckBox
         android:id="@+id/prevent_duplicates"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:enabled="false"
         android:text="@string/prevent_duplicates" />
 
     <Button

@@ -7,6 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
+/**
+ * BroadcastReceiver Demo
+ */
 public class IntroActivityReceiver extends BroadcastReceiver {
 
 	private static final String TRIGGER_TEXT = "google now api intro";
@@ -14,8 +17,6 @@ public class IntroActivityReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		String queryText = intent.getStringExtra(GoogleSearchApi.KEY_QUERY_TEXT);
-
-		Toast.makeText(context, "Teste GAPI", Toast.LENGTH_SHORT).show();
 
 		if (queryText.toLowerCase(Locale.ENGLISH).contains(TRIGGER_TEXT)) {
 			Intent launchIntent = new Intent(context, IntroActivity.class);

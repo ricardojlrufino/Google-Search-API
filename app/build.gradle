@@ -7,8 +7,8 @@ android {
         applicationId "com.mohammadag.googlesearchapi"
         minSdkVersion 15
         targetSdkVersion 22
-        versionCode 28
-        versionName '1.5h'
+        versionCode 29
+        versionName '1.5i'
     }
     buildTypes {
         release {
