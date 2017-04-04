@@ -19,8 +19,6 @@ import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LayoutInflated;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
-import static de.robv.android.xposed.XposedHelpers.callMethod;
-import static de.robv.android.xposed.XposedHelpers.callStaticMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 
@@ -46,8 +44,7 @@ public class GoogleSearchAPIModule implements IXposedHookLoadPackage, IXposedHoo
         resparam.res.hookLayout(Constants.APP_PACKAGE, "layout", "fragment_intro", new XC_LayoutInflated() {
             @Override
             public void handleLayoutInflated(XC_LayoutInflated.LayoutInflatedParam liparam) throws Throwable {
-                TextView status = (TextView) liparam.view.findViewById(
-                        liparam.res.getIdentifier("status_text", "id", Constants.APP_PACKAGE));
+                TextView status = (TextView) liparam.view.findViewById(liparam.res.getIdentifier("status_text", "id", Constants.APP_PACKAGE));
                 status.setText(Html.fromHtml("<b>Status:</b> Up and running<br/>"));
             }
         });
@@ -59,58 +56,36 @@ public class GoogleSearchAPIModule implements IXposedHookLoadPackage, IXposedHoo
 		if (!lpparam.packageName.equals(Constants.GOOGLE_SEARCH_PACKAGE))
 			return;
 
-		// Thank you to KeepChat For the Following Code Snippet
-		// http://git.io/JJZPaw
-		Object activityThread = callStaticMethod(findClass("android.app.ActivityThread", null), "currentActivityThread");
-        final Context context = (Context) callMethod(activityThread, "getSystemContext");
-        
-        final int versionCheck = context.getPackageManager().getPackageInfo(lpparam.packageName, 0).versionCode;
-        //End Snippet
-
-		XposedBridge.log("Version Code: " + versionCheck);
+//		// Thank you to KeepChat For the Following Code Snippet
+//		// http://git.io/JJZPaw
+//		Object activityThread = callStaticMethod(findClass("android.app.ActivityThread", null), "currentActivityThread");
+//        final Context context = (Context) callMethod(activityThread, "getSystemContext");
+//        final int versionCheck = context.getPackageManager().getPackageInfo(lpparam.packageName, 0).versionCode;
+//        //End Snippet
+//
+//		XposedBridge.log("Version Code: " + versionCheck);
 
         mPreferences.makeWorldReadable();
 
         xposedTargetClass = mPreferences.getString("Hook", Constants.DEFAULT_HOOK);
 
-        XposedBridge.log("GSAPI Class: " + xposedTargetClass);
+        XposedBridge.log("GSAPI Hook: " + xposedTargetClass);
 
         try {
+
             Class<?> targetClass = findClass(xposedTargetClass, lpparam.classLoader);
             Method[] methods = XposedHelpers.findMethodsByExactParameters(targetClass, void.class, xposedTargetParam);
 
-            if(methods.length > 0)  XposedBridge.log(" Found: " + methods[0].getName());
+            // if(methods.length > 0)  XposedBridge.log(" Found: " + methods[0].getName());
 
             findAndHookMethod(targetClass, methods[0].getName(), xposedTargetParam, new XC_MethodHook() {
 
                 @Override
-                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    XposedBridge.log("GSAPI before: " + param.args[0].toString());
-                    broadcastGoogleSearch(AndroidAppHelper.currentApplication().getApplicationContext(), param.args[0].toString());
-                    param.args[0] = new String("none");
-                }
-
-                @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    XposedBridge.log("GSAPI after: " + param.args[0].toString());
+                    // XposedBridge.log("GSAPI broadcast : " + param.args[0].toString());
+                    broadcastGoogleSearch(AndroidAppHelper.currentApplication().getApplicationContext(), param.args[0].toString());
                 }
             });
-
-
-
-//            Class<?> targetClass = findClass(xposedTargetClass, lpparam.classLoader);
-//            Method[] methods = XposedHelpers.findMethodsByExactParameters(targetClass, void.class, xposedTargetParam);
-//
-//            if(methods.length > 0)  XposedBridge.log(" Found: " + methods[0].getName());
-//
-//            findAndHookMethod(targetClass, methods[0].getName(), xposedTargetParam, new XC_MethodHook() {
-//
-//                @Override
-//                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                    XposedBridge.log("GSAPI broadcast : " + param.args[0].toString());
-//                    broadcastGoogleSearch(AndroidAppHelper.currentApplication().getApplicationContext(), param.args[0].toString());
-//                }
-//            });
 
         } catch (Exception e) {
             XposedBridge.log("GSAPI - " +e);

@@ -13,5 +13,6 @@ public class Constants {
 	public static final String INTENT_FLUSH_INTENTS = "com.mohammadag.googlesearchapi.FLUSH_INTENTS";
 
 	public static final String PERMISSION = "com.mohammadag.googlesearchapi.permission.ACCESS_GGOGLE_SEARCH_API";
-	public static final String DEFAULT_HOOK = "com.google.android.apps.gsa.search.shared.overlay.a.v";
+
+	public static final String DEFAULT_HOOK = "com.google.android.apps.gsa.search.core.service.m";
 }

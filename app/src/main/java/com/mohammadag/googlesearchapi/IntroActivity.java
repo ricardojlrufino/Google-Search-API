@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -61,6 +62,7 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 	public PluginsFragment mPluginsFragment;
 	private BroadcastReceiver mPackageReceiver;
     String version = "123";
+    String versionStr = "";
 
 	class DownloadTask extends AsyncTask<String, String, String> {
 
@@ -89,15 +91,6 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 
 			if(result == null || result.equals("")){
 				setToast("Download Fail !");
-			}
-
-			// Check current google now api version
-			List<PackageInfo> packs = getPackageManager().getInstalledPackages(0);
-			for (int i = 0; i < packs.size(); i++) {
-				PackageInfo p = packs.get(i);
-				if (p.packageName.equals("com.google.android.googlequicksearchbox")) {
-					version = Integer.toString(p.versionCode);
-				}
 			}
 
 			SharedPreferences prfs = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE);
@@ -139,7 +132,7 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 
                 toast = "Using default hooks";
 
-            }else if (found.equalsIgnoreCase(Constants.DEFAULT_HOOK) || found.equalsIgnoreCase(currentHook)){
+            }else if (found.equalsIgnoreCase(currentHook)){
 
                 toast = "You already have the latest hooks";
 
@@ -162,6 +155,14 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
         SharedPreferences prfs = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE);
         String hookcheck = prfs.getString("Hooks", null);
 
+        // Check current google now api version
+        try {
+            PackageInfo p = getPackageManager().getPackageInfo("com.google.android.googlequicksearchbox", PackageManager.GET_GIDS);
+            version = Integer.toString(p.versionCode);
+            versionStr = p.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
 		Set<String> categories = getIntent().getCategories();
 		if (categories != null) {
@@ -209,6 +210,7 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 		public Fragment getItem(int position) {
 			if (position == 0) {
 				IntroFragment fragment = new IntroFragment();
+                fragment.setGoogleVersion(versionStr, version);
 				return fragment;
 			} else if (position == 1) {
 				mPluginsFragment = new PluginsFragment();
@@ -280,7 +282,7 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 			return true;
 		case R.id.menu_visit_support_thread:
 			Intent i = new Intent(Intent.ACTION_VIEW);
-			i.setData(Uri.parse("http://mohammadag.xceleo.org/redirects/google_now_api.html"));
+			i.setData(Uri.parse("https://forum.xda-developers.com/xposed/modules/mod-google-search-api-t2554173/post48109086"));
 			startActivity(i);
 			return true;
         case R.id.menu_change:
@@ -297,6 +299,7 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
                     SharedPreferences.Editor editor = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE).edit();
                     editor.putString("Hook", input.getText().toString());
                     editor.apply();
+                    setToast("Hooks have been updated.\nPlease reboot!");
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

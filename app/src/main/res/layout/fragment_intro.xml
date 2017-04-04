@@ -49,6 +49,13 @@
         android:layout_marginTop="16dp"
         android:text="@string/status_text" />
 
+    <TextView
+        android:id="@+id/status_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/status_version" />
+
     <CheckBox
         android:id="@+id/delay_broadcasts_checkbox"
         android:layout_width="match_parent"

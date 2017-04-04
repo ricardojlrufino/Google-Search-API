@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Google Search API</string>
+    <string name="app_name">Google Now Xposed API</string>
     <string name="permission_description">Allows this package to add or override commands in the Google Search app</string>
     <string name="permission_label">Google Search/Now API</string>
     <string name="action_settings">Settings</string>
@@ -10,6 +10,11 @@
     <string name="status_text">
 		<![CDATA[
 		    <b>Status:</b> %s<br/>
+		  ]]>
+    </string>
+    <string name="status_version">
+		<![CDATA[
+		    <b>Version:</b> %s<br/>
 		  ]]>
     </string>
     <string name="hide_app">Hide icon from drawer</string>
@@ -27,7 +32,7 @@
     <string name="title_section2">Plugins</string>
     <string name="no_ui_plugin">This plugin has no UI</string>
     <string name="donate">Donate</string>
-    <string name="hooks">Update Hooks</string>
+    <string name="hooks">Download Hooks</string>
     <string name="prevent_duplicates">Prevent duplicate searches</string>
 
 </resources>

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.Html;
@@ -24,7 +23,12 @@ import android.widget.TextView;
 
 public class IntroFragment extends Fragment {
 	private TextView mStatusTextView;
+	private TextView mStatusVersionView;
 	private Button mToggleActivityVisibilityButton;
+
+	// Google API Version
+	private String version = null;
+	private String versionName = null;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -38,6 +42,9 @@ public class IntroFragment extends Fragment {
             setStatusText(R.string.we_have_a_problem);
         }
 
+
+		mStatusVersionView = (TextView) view.findViewById(R.id.status_version);
+
 		Drawable icon = UiUtils.getGoogleSearchIcon(getActivity());
 		if (icon == null) {
 			setStatusText(R.string.google_search_not_installed);
@@ -45,6 +52,12 @@ public class IntroFragment extends Fragment {
 			ImageView iconView = (ImageView) view.findViewById(R.id.gsearch_icon);
 			iconView.setImageDrawable(icon);
 			//getActionBar().setIcon(icon);
+		}
+
+		if(version != null){
+			mStatusVersionView.setText(Html.fromHtml("<b>Google API:</b> " + versionName + " ("+version+")"));
+		}else{
+			mStatusVersionView.setText(Html.fromHtml("<b>Google API:</b> Not Found !"));
 		}
 
 
@@ -108,5 +121,10 @@ public class IntroFragment extends Fragment {
 
 	private void setStatusString(String text) {
 		mStatusTextView.setText(Html.fromHtml(getString(R.string.status_text, text)));
+	}
+
+	public void setGoogleVersion(String versionName, String version) {
+		this.versionName = versionName;
+		this.version = version;
 	}
 }
