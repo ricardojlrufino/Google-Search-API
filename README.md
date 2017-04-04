@@ -26,8 +26,8 @@ Of course, you're free to make your plugins free/paid/whatever.
 XPosed tutorial:
 https://github.com/rovo89/XposedBridge/wiki/Development-tutorial
 
-Add new hooks in file and make a PR
-_Key is Google search version, and value is the className_
+Add new hooks in file and make a PR  
+_Key is Google search version, and value is the className_  
 *hooksversion.properties*
 
 
