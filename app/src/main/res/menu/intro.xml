@@ -1,0 +1,24 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_about"
+        android:title="@string/about">
+    </item>
+    <item
+        android:id="@+id/menu_change"
+        android:title="Change Hooks">
+    </item>
+    <item
+        android:id="@+id/menu_donate"
+        android:title="@string/donate">
+    </item>
+    <item
+        android:id="@+id/menu_hooks"
+        android:title="@string/hooks">
+    </item>
+    <item
+        android:id="@+id/menu_visit_support_thread"
+        android:title="@string/menu_support_thread">
+    </item>
+
+</menu>
