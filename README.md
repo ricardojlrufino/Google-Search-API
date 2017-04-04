@@ -12,10 +12,10 @@ This repo is a Android Studio project (disable *Instant Run*).
 
 ## Create plugins
 
-See (Support Thread)[https://forum.xda-developers.com/xposed/modules/mod-google-search-api-t2554173]
+See [Support Thread](https://forum.xda-developers.com/xposed/modules/mod-google-search-api-t2554173)
 
 Implementing plugins is as easy as copying one file to your source, and implementing a BroadcastReceiver that listens for the search queries (sent as text). If you're implementing a UI, implement TextToSpeech for voice feedback, if not, use GoogleNowApi.speak for voice replies.
-All this is demonstrated in the examples above.
+All this is demonstrated in the *support thread*.
 You'll also need to add a permission to AndroidManifest.xml: *"com.mohammadag.googlesearchapi.permission.ACCESS_ GGOGLE_SEARCH_API"*
 Remember that any package needs one activity to be started to work, see the music controls example for a way around that.
 Of course, you're free to make your plugins free/paid/whatever.
@@ -28,13 +28,13 @@ https://github.com/rovo89/XposedBridge/wiki/Development-tutorial
 
 Add new hooks in file and make a PR
 _Key is Google search version, and value is the className_
-hooksversion.properties
+*hooksversion.properties*
 
 
 Find apk on device and copy to PC
 > db pull /data/app/com.google.android.googlequicksearchbox-2/base.apk /media/YOU/FOLDER
 
-Unpack and decompile (use: (Apktool)[https://ibotpeaches.github.io/Apktool/])
+Unpack and decompile (use: [Apktool](https://ibotpeaches.github.io/Apktool/)
 > java -jar apktool_2.2.2.jar d base.apk
 
 We need to find out which method is called after the text is recognized
