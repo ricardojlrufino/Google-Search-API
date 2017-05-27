@@ -32,7 +32,8 @@ https://github.com/rovo89/XposedBridge/wiki/Development-tutorial
 
 
 Find apk on device and copy to PC
-> adb pull /data/app/com.google.android.googlequicksearchbox-2/base.apk /media/YOU/FOLDER
+> adb pull /data/app/com.google.android.googlequicksearchbox-1/base.apk  
+> OR adb pull /data/app/com.google.android.googlequicksearchbox-**2**/base.apk
 
 Unpack and decompile (use: [Apktool](https://ibotpeaches.github.io/Apktool/)
 > java -jar apktool_2.2.2.jar d base.apk
