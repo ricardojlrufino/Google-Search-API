@@ -26,13 +26,13 @@ Of course, you're free to make your plugins free/paid/whatever.
 XPosed tutorial:
 https://github.com/rovo89/XposedBridge/wiki/Development-tutorial
 
-Add new hooks in file and make a PR  
-_Key is Google search version, and value is the className_  
-*hooksversion.properties*
+> **Please add new hooks in file and make a PR**  
+> _**Key** is Google search version, and **value** is the className_  
+> File: *hooksversion.properties*
 
 
 Find apk on device and copy to PC
-> db pull /data/app/com.google.android.googlequicksearchbox-2/base.apk /media/YOU/FOLDER
+> adb pull /data/app/com.google.android.googlequicksearchbox-2/base.apk /media/YOU/FOLDER
 
 Unpack and decompile (use: [Apktool](https://ibotpeaches.github.io/Apktool/)
 > java -jar apktool_2.2.2.jar d base.apk
