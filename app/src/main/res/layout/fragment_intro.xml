@@ -56,25 +56,12 @@
         android:layout_marginBottom="16dp"
         android:text="@string/status_version" />
 
-    <CheckBox
-        android:id="@+id/delay_broadcasts_checkbox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:text="@string/delay_broadcasts" />
-
-    <CheckBox
-        android:id="@+id/prevent_duplicates"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:text="@string/prevent_duplicates" />
 
     <Button
         android:id="@+id/button1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hide_app" />
+        android:text="@string/update_api" />
 
     <Space
         android:layout_width="wrap_content"

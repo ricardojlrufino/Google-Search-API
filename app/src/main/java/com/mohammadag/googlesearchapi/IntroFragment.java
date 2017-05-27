@@ -1,30 +1,39 @@
 package com.mohammadag.googlesearchapi;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Properties;
+import java.util.Set;
+
+import static com.mohammadag.googlesearchapi.GoogleSearchApi.UPDATE_URL;
 
 
 public class IntroFragment extends Fragment {
 	private TextView mStatusTextView;
 	private TextView mStatusVersionView;
-	private Button mToggleActivityVisibilityButton;
 
 	// Google API Version
 	private String version = null;
@@ -32,7 +41,7 @@ public class IntroFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.fragment_intro, container, false);	
+		View view = inflater.inflate(R.layout.fragment_intro, container, false);
 
 		mStatusTextView = (TextView) view.findViewById(R.id.status_text);
 
@@ -60,56 +69,18 @@ public class IntroFragment extends Fragment {
 			mStatusVersionView.setText(Html.fromHtml("<b>Google API:</b> Not Found !"));
 		}
 
-
-		mToggleActivityVisibilityButton = (Button) view.findViewById(R.id.button1);
-		mToggleActivityVisibilityButton.setText(UiUtils.getActivityVisibleInDrawer(getActivity()) ? R.string.hide_app : R.string.show_app);
-		mToggleActivityVisibilityButton.setOnClickListener(new OnClickListener() {	
+		view.findViewById(R.id.button1).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				if (UiUtils.getActivityVisibleInDrawer(getActivity())) {
-					AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-					builder.setMessage(R.string.how_do_i_get_back_here);
-					builder.setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							UiUtils.setActivityVisibleInDrawer(getActivity(), false);
-							mToggleActivityVisibilityButton.setText(R.string.show_app);
-						}
-					}); 
-					AlertDialog dialog = builder.create();
-					dialog.show();
-				} else {
-					UiUtils.setActivityVisibleInDrawer(getActivity(), true);
-					mToggleActivityVisibilityButton.setText(R.string.hide_app);
-				}
+                new DownloadTask().execute(UPDATE_URL);
 			}
 		});
 
 		TextView copyrightView = (TextView) view.findViewById(R.id.copyright_text);
 		copyrightView.setSelected(true);
 
-		final SharedPreferences preferences =
-				PreferenceManager.getDefaultSharedPreferences(getActivity());
+		final SharedPreferences preferences =  PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-		CheckBox delayBroadcasts = (CheckBox) view.findViewById(R.id.delay_broadcasts_checkbox);
-		delayBroadcasts.setChecked(preferences.getBoolean(Constants.KEY_DELAY_BROADCASTS, false));
-		delayBroadcasts.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				preferences.edit().putBoolean(Constants.KEY_DELAY_BROADCASTS, isChecked).commit();
-				getActivity().sendBroadcast(new Intent(Constants.INTENT_SETTINGS_UPDATED));
-			}
-		});
-
-		CheckBox preventDuplicates = (CheckBox) view.findViewById(R.id.prevent_duplicates);
-		preventDuplicates.setChecked(preferences.getBoolean(Constants.KEY_PREVENT_DUPLICATES, false));
-		preventDuplicates.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				preferences.edit().putBoolean(Constants.KEY_PREVENT_DUPLICATES, isChecked).commit();
-				getActivity().sendBroadcast(new Intent(Constants.INTENT_SETTINGS_UPDATED));
-			}
-		});
 		return view;
 	}
 
@@ -127,4 +98,126 @@ public class IntroFragment extends Fragment {
 		this.versionName = versionName;
 		this.version = version;
 	}
+
+    class DownloadTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... uri) {
+            String responseString = null;
+
+            try {
+                URL u = new URL(uri[0]);
+                URLConnection c = u.openConnection();
+                c.connect();
+
+                InputStream inputStream = c.getInputStream();
+
+                responseString = convertStreamToString(inputStream);
+            } catch (Exception e) {
+                responseString = null;
+            }
+
+
+            return responseString;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            if(result == null || result.equals("")){
+                setToast("Download Fail !");
+            }
+
+            SharedPreferences prfs = getActivity().getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE);
+            String currentHook = prfs.getString("Hook", Constants.DEFAULT_HOOK);
+
+            Properties properties = new Properties();
+            try {
+                properties.load(new StringReader(result));
+            } catch (IOException e) {
+                // none
+            }
+
+
+            String found = properties.getProperty(version);
+
+            // Try best match (-1)
+            if(found == null){
+
+                version = version.substring(0, version.length() - 1);
+
+                Set<Object> versions = properties.keySet();
+
+                for (Object v : versions) {
+
+                    String ver = v.toString().substring(0, v.toString().length() - 1);
+
+                    if(ver.equals(version)){
+                        found = properties.getProperty(ver);
+                    }
+
+                }
+
+            }
+
+            String toast = null;
+
+            if(found == null){
+
+                setHooks(Constants.DEFAULT_HOOK);
+
+                toast = "New hook not found !";
+
+            }else if (found.equalsIgnoreCase(currentHook)){
+
+                toast = "You already have the latest hooks";
+
+            }else{
+
+                setHooks(found);
+
+                toast = "Hooks have been updated.\nPlease reboot!";
+
+            }
+
+            setToast(toast);
+        }
+
+        private String convertStreamToString(InputStream is) throws UnsupportedEncodingException {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line = null;
+            try {
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return sb.toString();
+        }
+    }
+
+
+    public void setHooks(String data) {
+        SharedPreferences.Editor editor = getActivity().getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE).edit();
+        editor.putString("Hook", data);
+        editor.putString("Version", version);
+        editor.apply();
+    }
+
+
+    public void setToast(String message) {
+        Toast toast = Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT);
+        TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+        if (v != null) v.setGravity(Gravity.CENTER);
+        toast.show();
+    }
+
 }

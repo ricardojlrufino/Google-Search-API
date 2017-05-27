@@ -17,8 +17,7 @@
 		    <b>Version:</b> %s<br/>
 		  ]]>
     </string>
-    <string name="hide_app">Hide icon from drawer</string>
-    <string name="show_app">Show app in drawer</string>
+    <string name="update_api">UPDATE API HOOKs</string>
     <string name="okay">"Okay, got it!"</string>
     <string name="we_have_liftoff">"Up and running"</string>
     <string name="we_have_a_problem">"Module inactive or something went wrong"</string>
@@ -32,7 +31,6 @@
     <string name="title_section2">Plugins</string>
     <string name="no_ui_plugin">This plugin has no UI</string>
     <string name="donate">Donate</string>
-    <string name="hooks">Download Hooks</string>
     <string name="prevent_duplicates">Prevent duplicate searches</string>
 
 </resources>

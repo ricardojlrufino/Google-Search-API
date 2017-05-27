@@ -11,6 +11,8 @@ public class GoogleSearchApi {
 	public static final String KEY_QUERY_TEXT = "query_text";
 	public static final String KEY_TEXT_TO_SPEAK = "text_to_speak";
 
+	public static final String UPDATE_URL = "https://raw.githubusercontent.com/ricardojlrufino/Google-Search-API/master/hooksversion.properties";
+
 	/* This method allows you to do TTS without implementing your own activity.
 	 * Note that this may not work if Google Search is not in the foreground.
 	 */

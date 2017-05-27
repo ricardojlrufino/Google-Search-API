@@ -61,99 +61,13 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 	public IntroFragment mIntroFragment;
 	public PluginsFragment mPluginsFragment;
 	private BroadcastReceiver mPackageReceiver;
-    String version = "123";
+    String version = "";
     String versionStr = "";
 
-	class DownloadTask extends AsyncTask<String, String, String> {
-
-		@Override
-		protected String doInBackground(String... uri) {
-			String responseString = null;
-
-			try {
-				URL u = new URL(uri[0]);
-				URLConnection c = u.openConnection();
-				c.connect();
-
-				InputStream inputStream = c.getInputStream();
-
-				responseString = convertStreamToString(inputStream);
-			} catch (Exception e) {
-				responseString = null;
-			}
-
-
-			return responseString;
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-
-			if(result == null || result.equals("")){
-				setToast("Download Fail !");
-			}
-
-			SharedPreferences prfs = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE);
-			String currentHook = prfs.getString("Hook", Constants.DEFAULT_HOOK);
-
-			Properties properties = new Properties();
-			try {
-				properties.load(new StringReader(result));
-			} catch (IOException e) {
-                // none
-			}
-
-            String found = properties.getProperty(version);
-
-            // Try best match (-1)
-            if(found == null){
-
-                version = version.substring(0, version.length() - 1);
-
-                Set<Object> versions = properties.keySet();
-
-                for (Object v : versions) {
-
-                    String ver = v.toString().substring(0, v.toString().length() - 1);
-
-                    if(ver.equals(version)){
-                        found = properties.getProperty(ver);
-                    }
-
-                }
-
-            }
-
-            String toast = null;
-
-            if(found == null){
-
-                setHooks(Constants.DEFAULT_HOOK);
-
-                toast = "Using default hooks";
-
-            }else if (found.equalsIgnoreCase(currentHook)){
-
-                toast = "You already have the latest hooks";
-
-            }else{
-
-                setHooks(found);
-
-                toast = "Hooks have been updated.\nPlease reboot!";
-
-            }
-
-			setToast(toast);
-		}
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-        SharedPreferences prfs = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE);
-        String hookcheck = prfs.getString("Hooks", null);
 
         // Check current google now api version
         try {
@@ -299,7 +213,6 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
                     SharedPreferences.Editor editor = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE).edit();
                     editor.putString("Hook", input.getText().toString());
                     editor.apply();
-                    setToast("Hooks have been updated.\nPlease reboot!");
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -316,9 +229,6 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 			donate.setData(Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5MW3FZSKRSP3Ll"));
 			startActivity(donate);
 			return true;
-        case R.id.menu_hooks:
-            new DownloadTask().execute("https://raw.githubusercontent.com/ricardojlrufino/Google-Search-API/master/hooksversion.properties");
-            return true;
 		case android.R.id.home:
 			onBackPressed();
 			return true;
@@ -391,37 +301,5 @@ public class IntroActivity extends FragmentActivity implements OnInitListener {
 		return randomNum;
 	}
 
-	public void setToast(String message) {
-		Toast toast = Toast.makeText(IntroActivity.this, message, Toast.LENGTH_SHORT);
-		TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-		if (v != null) v.setGravity(Gravity.CENTER);
-		toast.show();
-	}
 
-    public void setHooks(String data) {
-		SharedPreferences.Editor editor = getSharedPreferences("Hooks", Context.MODE_WORLD_READABLE).edit();
-		editor.putString("Hook", data);
-		editor.putString("Version", version);
-		editor.apply();
-    }
-
-	private static String convertStreamToString(InputStream is) throws UnsupportedEncodingException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-		StringBuilder sb = new StringBuilder();
-		String line = null;
-		try {
-			while ((line = reader.readLine()) != null) {
-				sb.append(line + "\n");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				is.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return sb.toString();
-	}
 }

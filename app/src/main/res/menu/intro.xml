@@ -13,10 +13,6 @@
         android:title="@string/donate">
     </item>
     <item
-        android:id="@+id/menu_hooks"
-        android:title="@string/hooks">
-    </item>
-    <item
         android:id="@+id/menu_visit_support_thread"
         android:title="@string/menu_support_thread">
     </item>
