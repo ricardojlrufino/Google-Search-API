@@ -19,6 +19,8 @@ import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LayoutInflated;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
+import static de.robv.android.xposed.XposedHelpers.callMethod;
+import static de.robv.android.xposed.XposedHelpers.callStaticMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 
@@ -56,15 +58,6 @@ public class GoogleSearchAPIModule implements IXposedHookLoadPackage, IXposedHoo
 		if (!lpparam.packageName.equals(Constants.GOOGLE_SEARCH_PACKAGE))
 			return;
 
-//		// Thank you to KeepChat For the Following Code Snippet
-//		// http://git.io/JJZPaw
-//		Object activityThread = callStaticMethod(findClass("android.app.ActivityThread", null), "currentActivityThread");
-//        final Context context = (Context) callMethod(activityThread, "getSystemContext");
-//        final int versionCheck = context.getPackageManager().getPackageInfo(lpparam.packageName, 0).versionCode;
-//        //End Snippet
-//
-//		XposedBridge.log("Version Code: " + versionCheck);
-
         mPreferences.makeWorldReadable();
 
         xposedTargetClass = mPreferences.getString("Hook", Constants.DEFAULT_HOOK);
@@ -76,7 +69,16 @@ public class GoogleSearchAPIModule implements IXposedHookLoadPackage, IXposedHoo
             Class<?> targetClass = findClass(xposedTargetClass, lpparam.classLoader);
             Method[] methods = XposedHelpers.findMethodsByExactParameters(targetClass, void.class, xposedTargetParam);
 
-            // if(methods.length > 0)  XposedBridge.log(" Found: " + methods[0].getName());
+            if(methods.length <= 0){
+                XposedBridge.log("Google API Changed, please update Hook's ");
+                // Thank you to KeepChat For the Following Code Snippet: http://git.io/JJZPaw
+                Object activityThread = callStaticMethod(findClass("android.app.ActivityThread", null), "currentActivityThread");
+                final Context context = (Context) callMethod(activityThread, "getSystemContext");
+                final int versionCheck = context.getPackageManager().getPackageInfo(lpparam.packageName, 0).versionCode;
+                XposedBridge.log("New Google API Version: " + versionCheck);
+                XposedBridge.log("Tutorial: https://github.com/ricardojlrufino/Google-Search-API");
+                return;
+            }
 
             findAndHookMethod(targetClass, methods[0].getName(), xposedTargetParam, new XC_MethodHook() {
 
@@ -88,7 +90,7 @@ public class GoogleSearchAPIModule implements IXposedHookLoadPackage, IXposedHoo
             });
 
         } catch (Exception e) {
-            XposedBridge.log("GSAPI - " +e);
+            XposedBridge.log("GSAPI ERROR - " +e);
         }
     }
 
