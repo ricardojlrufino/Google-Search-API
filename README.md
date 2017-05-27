@@ -14,12 +14,29 @@ This repo is a Android Studio project (disable *Instant Run*).
 
 See [Support Thread](https://forum.xda-developers.com/xposed/modules/mod-google-search-api-t2554173)
 
-Implementing plugins is as easy as copying one file to your source, and implementing a BroadcastReceiver that listens for the search queries (sent as text). If you're implementing a UI, implement TextToSpeech for voice feedback, if not, use GoogleNowApi.speak for voice replies.
+Implementing plugins is as easy as copying one file to your source, and implementing a BroadcastReceiver that listens for the search queries (sent as text). 
 All this is demonstrated in the *support thread*.
-You'll also need to add a permission to AndroidManifest.xml: *"com.mohammadag.googlesearchapi.permission.ACCESS_ GGOGLE_SEARCH_API"*
-Remember that any package needs one activity to be started to work, see the music controls example for a way around that.
-Of course, you're free to make your plugins free/paid/whatever.
 
+AndroidManifest.xml 
+```xml
+<uses-permission android:name="com.mohammadag.googlesearchapi.permission.ACCESS_GGOGLE_SEARCH_API" />
+...
+<receiver android:name=".now.GoogleSearchReceiver" >
+    <intent-filter>
+        <action android:name="com.mohammadag.googlesearchapi.NEW_SEARCH" />
+    </intent-filter>
+</receiver>
+```
+*GoogleSearchReceiver.java*  
+```java
+public class GoogleSearchReceiver extends BroadcastReceiver {
+    @Override
+	public void onReceive(Context context, Intent intent) {
+		String queryText = intent.getStringExtra(GoogleSearchApi.KEY_QUERY_TEXT);
+		Toast.makeText(context, "Test de API GOOGLE: " + queryText, Toast.LENGTH_SHORT).show();
+	}
+}
+```
 
 ## How to Hack Google API
 
